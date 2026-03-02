@@ -82,12 +82,29 @@ export function LoginScreen({
         }
       } else {
         await actor.register({ mobile, password });
-        toast.success("Account created successfully! You can now login.");
+        const autoLogin = await actor.login({ mobile, password });
+        if (autoLogin) {
+          toast.success("Account created! Welcome to Vijay Online Centre.");
+          onLoginSuccess?.(mobile);
+        } else {
+          toast.success("Account created! Please login.");
+          setMode("login");
+          setPassword("");
+        }
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("already registered")) {
+        toast.error("This mobile number is already registered. Please login.");
         setMode("login");
         setPassword("");
+      } else if (msg.includes("Unauthorized")) {
+        toast.error("Session expired. Please try again.");
+      } else {
+        toast.error(
+          "Unable to connect. Please check your internet and try again.",
+        );
       }
-    } catch {
-      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }

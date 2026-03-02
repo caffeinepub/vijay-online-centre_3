@@ -7,23 +7,33 @@ import { useState } from "react";
 
 type AppView = "login" | "dashboard" | "adminLogin" | "adminDashboard";
 
+function getInitialUserMobile(): string {
+  return localStorage.getItem("userMobile") || "";
+}
+
 function getInitialView(): AppView {
   if (localStorage.getItem("adminSession") === "true") {
     return "adminDashboard";
+  }
+  if (localStorage.getItem("userMobile")) {
+    return "dashboard";
   }
   return "login";
 }
 
 export default function App() {
   const [view, setView] = useState<AppView>(getInitialView);
-  const [loggedInMobile, setLoggedInMobile] = useState("");
+  const [loggedInMobile, setLoggedInMobile] =
+    useState<string>(getInitialUserMobile);
 
   function handleLoginSuccess(mobile: string) {
+    localStorage.setItem("userMobile", mobile);
     setLoggedInMobile(mobile);
     setView("dashboard");
   }
 
   function handleLogout() {
+    localStorage.removeItem("userMobile");
     setLoggedInMobile("");
     setView("login");
   }
